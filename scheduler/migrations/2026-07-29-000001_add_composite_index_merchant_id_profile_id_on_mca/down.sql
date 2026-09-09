@@ -1,1 +1,0 @@
-DROP INDEX CONCURRENTLY IF EXISTS merchant_connector_account_merchant_id_profile_id_index;

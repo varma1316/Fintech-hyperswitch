@@ -1,1 +1,0 @@
-DROP INDEX CONCURRENTLY IF EXISTS blocklist_processor_merchant_id_fingerprint_id_profile_id_index;

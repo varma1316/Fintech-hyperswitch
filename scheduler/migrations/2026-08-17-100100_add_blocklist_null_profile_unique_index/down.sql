@@ -1,1 +1,0 @@
-DROP INDEX CONCURRENTLY IF EXISTS blocklist_pm_fingerprint_null_profile_index;

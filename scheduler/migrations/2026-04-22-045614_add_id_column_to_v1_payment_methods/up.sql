@@ -1,4 +1,0 @@
-ALTER TABLE payment_methods
-ADD COLUMN IF NOT EXISTS id VARCHAR(64),
-ADD COLUMN IF NOT EXISTS payment_method_type_v2 VARCHAR(64),
-ADD COLUMN IF NOT EXISTS payment_method_subtype VARCHAR(64);

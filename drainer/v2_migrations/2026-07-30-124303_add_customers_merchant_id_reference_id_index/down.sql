@@ -1,1 +1,0 @@
-DROP INDEX CONCURRENTLY IF EXISTS customers_merchant_id_reference_id_index;

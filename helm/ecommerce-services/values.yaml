@@ -1,0 +1,143 @@
+# Global configuration
+global:
+  environment: production
+  awsRegion: us-east-1
+  hyperswitchServerUrl: "http://hyperswitch.default.svc.cluster.local:8080"
+  hyperswitchApiKey: "test_admin_api_key"
+
+# Ingress Configuration (Compatible with AWS ALB & Istio Ingress Gateway)
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+  host: api.ecommerce.example.com
+
+# 1. Auth Service (Node.js)
+authService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-ecr-registry.amazonaws.com/auth-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 4001
+  env:
+    jwtSecret: "change-this-in-production-vault-or-secrets"
+    databaseUrl: "postgresql://postgres:db_pass@postgres-auth.default.svc.cluster.local:5432/ecommerce_auth"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# 2. Product Service (Python / FastAPI)
+productService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-ecr-registry.amazonaws.com/product-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 4002
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# 3. Cart Service (Node.js)
+cartService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-ecr-registry.amazonaws.com/cart-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 4003
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# 4. Order Service (Node.js + SNS Publisher)
+orderService:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: your-ecr-registry.amazonaws.com/order-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  env:
+    orderDbUrl: "postgresql://postgres:db_pass@postgres-orders.default.svc.cluster.local:5432/ecommerce_orders"
+    snsTopicArn: "arn:aws:sns:us-east-1:123456789012:PaymentSucceededTopic"
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+# 5. Inventory Service (Python / FastAPI + SQS Consumer)
+inventoryService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-ecr-registry.amazonaws.com/inventory-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8001
+  env:
+    sqsQueueUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/InventoryQueue"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# 6. Notification Service (Python / FastAPI + SQS Consumer + SMTP)
+notificationService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-ecr-registry.amazonaws.com/notification-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8002
+  env:
+    sqsQueueUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/NotificationQueue"
+    smtpServer: "email-smtp.us-east-1.amazonaws.com"
+    smtpPort: 587
+    senderEmail: "orders@ecommerce.example.com"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
